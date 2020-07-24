@@ -1,16 +1,17 @@
 import bot
 import server
 import os
+import encryption
 from sheets_database import SheetsDatabase
 
-server = server.GDHKeepAliveServer() #keep alive http server
-server.asyncStart()
+server.GDHKeepAliveServer().asyncStart() #keep alive http server
 
-database = SheetsDatabase("Server Database")
+decrypt_key = os.getenv("decrypt_key")
 
-print(database.get_worksheet_dict(0))
+decrypted_client_secret = encryption.decrypt_str(os.getenv("client_secret_fernet"), decrypt_key)
+
+database = SheetsDatabase("Server DataBase", "1-uyTYXpOHNWEMlOXHxfVD8LU_UGgIw2wiheAoddVxVk", decrypted_client_secret)
 
 discord_token = os.getenv("discord_token") #get bot token from .env file
 
-gdhBot = bot.GDHBotClient() #initialize bot client instance
-gdhBot.run(discord_token); #start bot execution
+bot.start(database, discord_token) #initialize bot client instance
